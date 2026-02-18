@@ -434,9 +434,15 @@ export default function UserCrudPage() {
 */
 
 import React, { useState, useRef, useMemo, useEffect } from "react";
-import GenericGrid from "../components/crud/GenericGrid";
-import UserForm from "../components/UserForm";
-import useGridFocusManager from "../grid/useGridFocusManager";
+
+//import GenericGrid from "../components/crud/GenericGrid";
+//import UserForm from "../components/UserForm";
+//import useGridFocusManager from "../grid/useGridFocusManager";
+
+import GenericGrid from "../../core/grid/GenericGrid";
+import useGridFocusManager from "../../core/grid/useGridFocusManager";
+import UserForm from "./UserForm";
+
 
 export default function UserCrudPage() {
   /* ---------------- STATE ---------------- */

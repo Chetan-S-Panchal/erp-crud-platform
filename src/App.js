@@ -1,7 +1,7 @@
 // --- Milestone 4
 
 import React from "react";
-import UserCrudPage from "./pages/UserCrudPage";
+import UserCrudPage from "./features/users/UserCrudPage";
 
 function App() {
   return <UserCrudPage />;

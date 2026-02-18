@@ -1,6 +1,8 @@
-// --- Milestone 4
+/*
+// --- Milestone 4 & 5
 
 import React, { useEffect, useRef } from "react";
+import GenericForm from "../../core/form/GenericForm";
 
 export default function UserForm({
   mode, // add | edit | view | delete
@@ -19,11 +21,11 @@ export default function UserForm({
 
   const readOnly = isView || isDelete;
 
-  /* ---------- REFS (FOCUS CONTROL) ---------- */
+  / ---------- REFS (FOCUS CONTROL) ---------- /
   const firstInputRef = useRef(null);
   const cancelBtnRef = useRef(null);
 
-  /* ---------- AUTO FOCUS ---------- */
+  / ---------- AUTO FOCUS ---------- /
   useEffect(() => {
     if (isView || isDelete) {
       cancelBtnRef.current?.focus();
@@ -32,7 +34,7 @@ export default function UserForm({
     }
   }, [mode, isView, isDelete]);
 
-  /* ---------- KEYBOARD SHORTCUTS ---------- */
+  / ---------- KEYBOARD SHORTCUTS ---------- /
 
   useEffect(() => {
     const handler = (e) => {
@@ -65,14 +67,14 @@ export default function UserForm({
   }, [mode, values, onSave, onDelete, onCancel, isAdd, isEdit, isDelete]);
 
 
-  /* ---------- CHANGE HANDLER ---------- */
+  / ---------- CHANGE HANDLER ---------- /
   const handleChange = (field, value) => {
     if (!readOnly) {
       onChange(field, value);
     }
   };
 
-  /* ---------- FIELD RENDER ---------- */
+  / ---------- FIELD RENDER ---------- /
   const renderField = (label, field, type = "text", ref = null) => (
     <div style={{ marginBottom: 12 }}>
       <label style={{ display: "block", fontWeight: 600 }}>
@@ -100,7 +102,7 @@ export default function UserForm({
     </div>
   );
 
-  /* ---------- HEADER ---------- */
+  / ---------- HEADER ---------- /
   const title =
     isAdd ? "Add New" :
     isEdit ? "Edit" :
@@ -111,19 +113,19 @@ export default function UserForm({
     <div style={{ minWidth: 320 }}>
       <h3 style={{ marginBottom: 12 }}>{title}</h3>
 
-      {/* ---------- INPUTS ---------- */}
+      {/ ---------- INPUTS ---------- /}
       {renderField("Name", "name", "text", firstInputRef)}
       {renderField("Age", "age", "number")}
       {renderField("City", "city")}
 
-      {/* ---------- DELETE CONFIRM ---------- */}
+      {/ ---------- DELETE CONFIRM ---------- /}
       {isDelete && (
         <div style={{ color: "red", marginBottom: 12 }}>
           Sure to Delete the Entry?
         </div>
       )}
 
-      {/* ---------- ACTION BUTTONS ---------- */}
+      {/ ---------- ACTION BUTTONS ---------- /}
       <div
         style={{
           display: "flex",
@@ -162,5 +164,35 @@ export default function UserForm({
         </button>
       </div>
     </div>
+  );
+}
+
+*/
+
+import React from "react";
+import GenericForm from "../../core/form/GenericForm";
+
+export default function UserForm(props) {
+  const fields = [
+    { label: "Name", name: "name", type: "text" },
+    { label: "Age", name: "age", type: "number" },
+    { label: "City", name: "city", type: "text" }
+  ];
+
+  const title =
+    props.mode === "add"
+      ? "Add New"
+      : props.mode === "edit"
+      ? "Edit"
+      : props.mode === "view"
+      ? "View"
+      : "Delete";
+
+  return (
+    <GenericForm
+      {...props}
+      title={title}
+      fields={fields}
+    />
   );
 }
