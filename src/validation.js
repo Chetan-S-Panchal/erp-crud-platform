@@ -1,4 +1,4 @@
-// --- Milestone 4
+// --- Milestone 6
 
 
 // ---------- VALIDATION RULES ---------- /

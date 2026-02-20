@@ -1,4 +1,4 @@
-// --- Milestone 4
+// --- Milestone 6
 
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";

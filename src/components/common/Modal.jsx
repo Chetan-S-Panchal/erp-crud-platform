@@ -1,4 +1,4 @@
-// --- Milestone 4
+// --- Milestone 6
 
 import React, { useEffect } from "react";
 import "./modal.css";   // make sure this is correct path

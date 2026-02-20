@@ -1,4 +1,4 @@
-// --- Milestone 4
+// --- Milestone 6
 
 import React from "react";
 import UserCrudPage from "./features/users/UserCrudPage";

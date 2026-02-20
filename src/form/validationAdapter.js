@@ -4,7 +4,7 @@
 // Utility: run single rule
 // -----------------------------
 
-// --- Milestone 4
+// --- Milestone 6
 
 function runRule(rule, value, values) {
   // rule can be:

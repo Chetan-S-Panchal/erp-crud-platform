@@ -1,5 +1,5 @@
 
-// --- Milestone 4
+// --- Milestone 6
 
 export default function createFocusManager() {
   const fields = new Map();
