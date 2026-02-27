@@ -494,39 +494,15 @@ export default function UserCrudPage() {
         onRowSelected={handleRowSelected}
       />
 
-      {mode && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              padding: 20,
-              borderRadius: 8,
-              width: 500,
-              maxWidth: "90%",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.3)"
-            }}
-          >
-            <UserForm
-              mode={mode}
-              values={selectedRow}
-              onChange={handleChange}
-              onSave={handleSave}
-              onDelete={handleConfirmDelete}
-              onCancel={handleCancel}
-            />
-          </div>
-        </div>
-      )}
+<UserForm
+  isOpen={!!mode}
+  mode={mode}
+  values={selectedRow}
+  onChange={handleChange}
+  onSave={handleSave}
+  onDelete={handleConfirmDelete}
+  onCancel={handleCancel}
+/>      
     </div>
   );
 }

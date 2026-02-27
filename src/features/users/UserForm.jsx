@@ -57,14 +57,13 @@ export default function UserForm(props) {
 }
   
 */
-
-// --- Milestone 6
+// --- Milestone 7 Clean UserForm
 
 import React from "react";
 import GenericForm from "../../core/form/GenericForm";
+import BaseModal from "../../core/ui/BaseModal";
 
 export default function UserForm(props) {
-  /* ---------- ENTITY NAME (Reusable Pattern) ---------- */
   const entityName = "User";
 
   const modeLabelMap = {
@@ -76,7 +75,6 @@ export default function UserForm(props) {
 
   const title = `${modeLabelMap[props.mode] || ""} ${entityName}`;
 
-  /* ---------- FIELD SCHEMA ---------- */
   const fields = [
     {
       label: "Name",
@@ -107,10 +105,24 @@ export default function UserForm(props) {
   ];
 
   return (
-    <GenericForm
-      {...props}
+    <BaseModal
+      isOpen={props.isOpen}
       title={title}
-      fields={fields}
-    />
+      mode={props.mode}
+      onSave={() => props.onSave(props.values)}
+      onCancel={props.onCancel}
+      onDelete={props.onDelete}
+      isValid={true} // temporary — we will centralize validation later
+    >
+      <>
+        <GenericForm
+          mode={props.mode}
+          fields={fields}
+          values={props.values}
+          onChange={props.onChange}
+        />
+        
+      </>
+    </BaseModal>
   );
 }
