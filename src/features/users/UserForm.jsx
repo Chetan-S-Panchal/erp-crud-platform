@@ -62,6 +62,7 @@ export default function UserForm(props) {
 import React from "react";
 import GenericForm from "../../core/form/GenericForm";
 import BaseModal from "../../core/ui/BaseModal";
+//import { getSpaceUntilMaxLength } from "@testing-library/user-event/dist/utils";
 
 export default function UserForm(props) {
   const entityName = "User";
@@ -76,33 +77,32 @@ export default function UserForm(props) {
   const title = `${modeLabelMap[props.mode] || ""} ${entityName}`;
 
   const fields = [
-    {
-      label: "Name",
-      name: "name",
-      type: "text",
-      required: true,
-      minLength: 2,
-      maxLength: 30,
-      guideline: "2–30 characters"
-    },
-    {
-      label: "Age",
-      name: "age",
-      type: "number",
-      required: true,
-      min: 1,
-      max: 120,
-      guideline: "1–120"
-    },
-    {
-      label: "City",
-      name: "city",
-      type: "text",
-      required: true,
-      maxLength: 40,
-      guideline: "Max 40 characters"
-    }
-  ];
+  {
+    name: "name",
+    label: "Name",
+    type: "text",
+    required: true,   // 👈 important
+    minLength: 3,           // 👈 optional validation
+    maxLength: 50,
+    guideline: "Min 3, Max 50 characters"
+  },
+  {
+    name: "age",
+    label: "Age",
+    type: "number",
+    min: 1,
+    required: true,
+    guideline: "Enter Valid Age"
+  },
+  {
+    name: "city",
+    label: "City",
+    type: "select",
+    options: ["Mumbai", "Delhi"],
+    required: true,   // 👈 important
+    guideline: "Select city"
+  }
+];
 
   return (
     <BaseModal

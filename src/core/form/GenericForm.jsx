@@ -281,14 +281,26 @@ export default function GenericForm({
     []
   );
 
-  //console.log("GenericForm mounted", { mode, values });
-
   /* ---------- AUTO FOCUS ---------- */
   useEffect(() => {
     if (!readOnly) {
       firstInputRef.current?.focus();
     }
   }, [mode, readOnly]);
+
+  /* ---------- NORMALIZE VALUE ---------- */
+  const normalizeValue = (field, rawValue) => {
+    if (field.type === "number") {
+      if (rawValue === "" || rawValue === null) return "";
+      return Number(rawValue);
+    }
+
+    if (typeof rawValue === "string") {
+      return rawValue.trim(); // 🔥 IMPORTANT FIX
+    }
+
+    return rawValue;
+  };
 
   /* ---------- VALIDATE SINGLE FIELD ---------- */
   const validateSingleField = (field, value) => {
@@ -300,11 +312,8 @@ export default function GenericForm({
   };
 
   /* ---------- HANDLE FIELD CHANGE ---------- */
-  const handleFieldChange = (field, value) => {
-    setInternalTouched(prev => ({
-      ...prev,
-      [field.name]: true
-    }));
+  const handleFieldChange = (field, rawValue) => {
+    const value = normalizeValue(field, rawValue);
 
     const error = validateSingleField(field, value);
 
@@ -317,19 +326,77 @@ export default function GenericForm({
   };
 
   /* ---------- HANDLE FIELD BLUR ---------- */
-  const handleFieldBlur = (field) => {
+  const handleFieldBlur = (field, rawValueFromEvent) => {
+    const value = normalizeValue(field, rawValueFromEvent);
+console.log("BLUR VALUE:", value, typeof value);
+    // 🔥 Sync value to parent (IMPORTANT)
+    onChange(field.name, value);
+
+    // Mark touched
     setInternalTouched(prev => ({
       ...prev,
       [field.name]: true
     }));
 
-    const value = values[field.name];
     const error = validateSingleField(field, value);
 
     setInternalErrors(prev => ({
       ...prev,
       [field.name]: error
     }));
+  };
+
+  /* ---------- FIELD TYPE RENDERER ---------- */
+  const renderInputByType = (field, index) => {
+    const commonProps = {
+      ref: index === 0 ? firstInputRef : null,
+      value: values[field.name] ?? "",
+      disabled: readOnly,
+      onChange: (e) => handleFieldChange(field, e.target.value),
+      //onBlur: () => handleFieldBlur(field), // ✅ ONLY HERE
+      onBlur: (e) => handleFieldBlur(field, e.target.value),
+      style: {
+        width: "100%",
+        padding: 6,
+        boxSizing: "border-box",
+        border: "none",
+        outline: "none"
+      }
+    };
+
+    switch (field.type) {
+      case "number":
+        return <input type="number" {...commonProps} />;
+
+      case "select":
+        return (
+          <select
+            {...commonProps}
+            onFocus={(e) => {
+              e.target.size = field.options?.length || 2;
+            }}
+            onBlur={(e) => {
+              e.target.size = 1;
+              handleFieldBlur(field, e.target.value); // ✅ IMPORTANT
+            }}
+          >
+            <option value="">Select</option>
+            {field.options?.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        );
+
+      case "text":
+      default:
+        return (
+          <input
+            type="text"
+            {...commonProps}
+            maxLength={field.maxLength || undefined}
+          />
+        );
+    }
   };
 
   /* ---------- FIELD RENDER ---------- */
@@ -345,50 +412,32 @@ export default function GenericForm({
           position: "relative"
         }}
       >
+        {/* Label */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
             marginBottom: 4
           }}
         >
           <label style={{ fontWeight: 600 }}>
             {field.label}
+            {field.required && (
+              <span style={{ color: "red", marginLeft: 4 }}>*</span>
+            )}
           </label>
-
-          {field.guideline && (
-            <span
-              style={{
-                fontSize: 11,
-                color: "#666"
-              }}
-            >
-              {field.guideline}
-            </span>
-          )}
         </div>
 
-        <input
-          ref={index === 0 ? firstInputRef : null}
-          type={field.type || "text"}
-          value={values[field.name] ?? ""}
-          disabled={readOnly}
-          maxLength={field.maxLength}
-          min={field.min}
-          max={field.max}
-          onChange={(e) =>
-            handleFieldChange(field, e.target.value)
-          }
-          onBlur={() => handleFieldBlur(field)}
+        {/* Input */}
+        <div
           style={{
-            width: "100%",
-            padding: 6,
-            boxSizing: "border-box",
             border: hasError ? "1px solid red" : "1px solid #ccc"
           }}
-        />
+        >
+          {renderInputByType(field, index)}
+        </div>
 
+        {/* Error */}
         {hasError && (
           <div
             style={{
