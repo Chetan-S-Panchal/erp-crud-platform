@@ -256,21 +256,32 @@ export default function GenericForm({
 
 // --- Milestone 7 Clean GenericForm (Field Renderer Only)
 
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useMemo,
+  useState,
+  forwardRef,
+  useImperativeHandle
+} from "react";
 import ValidationAdapter from "./ValidationAdapter";
 
-export default function GenericForm({
-  mode,
-  fields = [],
-  values = {},
-  onChange
-}) {
+const GenericForm = forwardRef(function GenericForm(
+  {
+    mode,
+    fields = [],
+    values = {},
+    onChange
+  },
+  ref
+) {
   const isView = mode === "view";
   const isDelete = mode === "delete";
 
   const readOnly = isView || isDelete;
 
   const firstInputRef = useRef(null);
+  const fieldRefs = useRef({}); // ✅ NEW
 
   /* ---------- INTERNAL VALIDATION STATE ---------- */
   const [internalErrors, setInternalErrors] = useState({});
@@ -296,7 +307,7 @@ export default function GenericForm({
     }
 
     if (typeof rawValue === "string") {
-      return rawValue.trim(); // 🔥 IMPORTANT FIX
+      return rawValue.trim();
     }
 
     return rawValue;
@@ -311,13 +322,50 @@ export default function GenericForm({
     return errorObj[field.name];
   };
 
+  /* ---------- ✅ VALIDATE ALL FIELDS (WITH FOCUS) ---------- */
+  const validateAllFields = () => {
+    let errors = {};
+    let touched = {};
+    let firstErrorField = null;
+
+    fields.forEach((field) => {
+      const value = normalizeValue(field, values[field.name]);
+      const error = validateSingleField(field, value);
+
+      if (error) {
+        errors[field.name] = error;
+
+        if (!firstErrorField) {
+          firstErrorField = field.name; // capture first error
+        }
+      }
+
+      touched[field.name] = true;
+    });
+
+    setInternalErrors(errors);
+    setInternalTouched(touched);
+
+    // ✅ FOCUS FIRST ERROR FIELD
+    if (firstErrorField && fieldRefs.current[firstErrorField]) {
+      fieldRefs.current[firstErrorField].focus();
+    }
+
+    return Object.keys(errors).length === 0;
+  };
+
+  /* ---------- EXPOSE TO PARENT ---------- */
+  useImperativeHandle(ref, () => ({
+    validateForm: validateAllFields
+  }));
+
   /* ---------- HANDLE FIELD CHANGE ---------- */
   const handleFieldChange = (field, rawValue) => {
     const value = normalizeValue(field, rawValue);
 
     const error = validateSingleField(field, value);
 
-    setInternalErrors(prev => ({
+    setInternalErrors((prev) => ({
       ...prev,
       [field.name]: error
     }));
@@ -328,19 +376,17 @@ export default function GenericForm({
   /* ---------- HANDLE FIELD BLUR ---------- */
   const handleFieldBlur = (field, rawValueFromEvent) => {
     const value = normalizeValue(field, rawValueFromEvent);
-console.log("BLUR VALUE:", value, typeof value);
-    // 🔥 Sync value to parent (IMPORTANT)
+
     onChange(field.name, value);
 
-    // Mark touched
-    setInternalTouched(prev => ({
+    setInternalTouched((prev) => ({
       ...prev,
       [field.name]: true
     }));
 
     const error = validateSingleField(field, value);
 
-    setInternalErrors(prev => ({
+    setInternalErrors((prev) => ({
       ...prev,
       [field.name]: error
     }));
@@ -349,11 +395,13 @@ console.log("BLUR VALUE:", value, typeof value);
   /* ---------- FIELD TYPE RENDERER ---------- */
   const renderInputByType = (field, index) => {
     const commonProps = {
-      ref: index === 0 ? firstInputRef : null,
+      ref: (el) => {
+        if (el) fieldRefs.current[field.name] = el; // ✅ track all refs
+        if (index === 0) firstInputRef.current = el;
+      },
       value: values[field.name] ?? "",
       disabled: readOnly,
       onChange: (e) => handleFieldChange(field, e.target.value),
-      //onBlur: () => handleFieldBlur(field), // ✅ ONLY HERE
       onBlur: (e) => handleFieldBlur(field, e.target.value),
       style: {
         width: "100%",
@@ -377,12 +425,14 @@ console.log("BLUR VALUE:", value, typeof value);
             }}
             onBlur={(e) => {
               e.target.size = 1;
-              handleFieldBlur(field, e.target.value); // ✅ IMPORTANT
+              handleFieldBlur(field, e.target.value);
             }}
           >
             <option value="">Select</option>
-            {field.options?.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+            {field.options?.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
           </select>
         );
@@ -460,4 +510,6 @@ console.log("BLUR VALUE:", value, typeof value);
       {fields.map(renderField)}
     </div>
   );
-}
+});
+
+export default GenericForm;

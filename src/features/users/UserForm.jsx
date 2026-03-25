@@ -59,10 +59,9 @@ export default function UserForm(props) {
 */
 // --- Milestone 7 Clean UserForm
 
-import React from "react";
+import React, { useRef } from "react";
 import GenericForm from "../../core/form/GenericForm";
 import BaseModal from "../../core/ui/BaseModal";
-//import { getSpaceUntilMaxLength } from "@testing-library/user-event/dist/utils";
 
 export default function UserForm(props) {
   const entityName = "User";
@@ -76,52 +75,66 @@ export default function UserForm(props) {
 
   const title = `${modeLabelMap[props.mode] || ""} ${entityName}`;
 
+  const formRef = useRef(); // ✅ NEW
+
   const fields = [
-  {
-    name: "name",
-    label: "Name",
-    type: "text",
-    required: true,   // 👈 important
-    minLength: 3,           // 👈 optional validation
-    maxLength: 50,
-    guideline: "Min 3, Max 50 characters"
-  },
-  {
-    name: "age",
-    label: "Age",
-    type: "number",
-    min: 1,
-    required: true,
-    guideline: "Enter Valid Age"
-  },
-  {
-    name: "city",
-    label: "City",
-    type: "select",
-    options: ["Mumbai", "Delhi"],
-    required: true,   // 👈 important
-    guideline: "Select city"
-  }
-];
+    {
+      name: "name",
+      label: "Name",
+      type: "text",
+      required: true,
+      minLength: 3,
+      maxLength: 50,
+      guideline: "Min 3, Max 50 characters"
+    },
+    {
+      name: "age",
+      label: "Age",
+      type: "number",
+      min: 1,
+      required: true,
+      guideline: "Enter Valid Age"
+    },
+    {
+      name: "city",
+      label: "City",
+      type: "select",
+      options: ["Mumbai", "Delhi"],
+      required: true,
+      guideline: "Select city"
+    }
+  ];
+
+  /* ---------- ✅ HANDLE SAVE WITH VALIDATION ---------- */
+  const handleSave = () => {
+    const isValid = formRef.current.validateForm();
+
+    if (!isValid) {
+      console.log("Form has errors");
+      return;
+    }
+
+    props.onSave(props.values);
+  };
 
   return (
     <BaseModal
       isOpen={props.isOpen}
       title={title}
       mode={props.mode}
-      onSave={() => props.onSave(props.values)}
+      onSave={handleSave} // ✅ UPDATED
       onCancel={props.onCancel}
       onDelete={props.onDelete}
-      isValid={true} // temporary — we will centralize validation later
+      isValid={true}
     >
       <>
         <GenericForm
+          ref={formRef} // ✅ IMPORTANT
           mode={props.mode}
           fields={fields}
           values={props.values}
           onChange={props.onChange}
         />
-        
       </>
     </BaseModal>
   );
